@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
@@ -33,14 +32,17 @@ public class AutoCompleteFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        // Set up our adapter
         CountriesAdapter adapter = new CountriesAdapter(getActivity(), Arrays.asList(COUNTRIES));
 
+        // Set it to the AutoCompleteTextView
         AutoCompleteTextView textView = (AutoCompleteTextView)rootView.findViewById(R.id.countries_autocomplete);
         textView.setAdapter(adapter);
 
 
         return rootView;
     }
+
 
     private class CountriesAdapter extends BaseAdapter implements Filterable {
 
@@ -66,8 +68,8 @@ public class AutoCompleteFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            String val = mFilteredData.get(position);
-            return val.equals(SECTION_HEADER) ? VIEW_TYPE_HEADER : VIEW_TYPE_ENTRY;
+            // Remember, any value of view type should return getViewTypeCount()-1!
+            return mFilteredData.get(position).equals(SECTION_HEADER) ? VIEW_TYPE_HEADER : VIEW_TYPE_ENTRY;
         }
 
         @Override
@@ -92,12 +94,14 @@ public class AutoCompleteFragment extends Fragment {
 
         @Override
         public boolean isEnabled(int position) {
+            // Headers should not be clickable
             return !(getItemViewType(position) == VIEW_TYPE_HEADER);
-
         }
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
+
+            // Do standard ViewHolder stuff
             ViewHolder holder;
 
             if(view == null) {
@@ -111,13 +115,16 @@ public class AutoCompleteFragment extends Fragment {
                 holder = (ViewHolder)view.getTag();
             }
 
+            // Set the background color
             if(getItemViewType(i) == VIEW_TYPE_HEADER) {
                 holder.mText.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
             } else {
                 holder.mText.setBackgroundColor(getResources().getColor(android.R.color.white));
             }
 
+            // Set the value to be displayed
             holder.mText.setText(mFilteredData.get(i));
+
             return view;
         }
 
@@ -133,9 +140,14 @@ public class AutoCompleteFragment extends Fragment {
 
                 if(constraint != null) {
                     for (int i = 0; i < mCountries.size(); i++) {
+                        // Every fifth item, add a header. Do not care if there
+                        // are items after that, we just want to illustrate
+                        // a point.
                         if(mFilteredData.size() % 5 == 0) {
                             mFilteredData.add(SECTION_HEADER);
                         }
+
+                        // Filter by start of string
                         String country = mCountries.get(i);
                         if(country.toLowerCase().startsWith(constraint.toString().toLowerCase())) {
                             mFilteredData.add(country);
@@ -154,6 +166,7 @@ public class AutoCompleteFragment extends Fragment {
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                // Tell our adapter about new stuff
                 mFilteredData = (List<String>)filterResults.values;
                 notifyDataSetChanged();
             }
